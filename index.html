@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Simple con Carrito</title>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+    <!-- Barra de Navegación -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">ARTESANIAS SIERRA</div>
+            <ul class="nav-links">
+                <li><a href="inicio.html">Inicio</a></li>
+                <li><a href="catalogo.html">Catálogo</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+                <li><a href="cotizacion.html">cotizacion</a></li>
+                 <li><a href="factura.html">ver factura</a></li>
+                <li>
+                    <button class="cart-badge-btn">
+                        🛒 Carrito (<span id="cart-count">0</span>)
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Contenido Principal -->
+    <div class="container">
+        <!-- Listado de Productos -->
+        <main>
+
+
+            
+
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Productos Disponibles</h2>
+            <div class="products-grid" id="products-grid">
+                <!-- Los productos se inyectan dinámicamente mediante JavaScript -->
+            </div>
+        </main>
+        
+        <!-- Panel del Carrito -->
+        <aside class="cart-section">
+            <div class="cart-title">Tu Carrito</div>
+            <ul class="cart-items" id="cart-items">
+                <p class="empty-cart">El carrito está vacío</p>
+            </ul>
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total-price">$0.00</span>
+            </div>
+            <button class="btn-checkout" onclick="checkout()">Finalizar Compra</button>
+        </aside>
+    </div>
+
+    <!-- Lógica en JavaScript -->
+    <script>
+        // Base de datos simulada de productos
+        const products = [
+            { id: 1, name: 'Tuna pequeña', price: 9000.00, image: 'fotos/tuna pequeña.jpeg' },
+            { id: 2, name: 'Tuna mediana', price: 14000.00, image: 'fotos/tuna mediana.jpeg' },
+            { id: 3, name: 'Tuna grande', price: 23000.00, image: 'fotos/tuna grande.jpeg' },
+            { id: 4, name: 'campana corrugada', price: 22000.00, image: 'fotos/campana corrugada.jpeg' }
+        ];
+
+        let cart = [];
+
+        // Renderizar productos en la interfaz
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}">
+                   
+                    <h3 class="product-title">${product.name}</h3>
+                    <div class="product-price">$${product.price.toFixed(2)}</div>
+                    <button class="btn-add" onclick="addToCart(${product.id})">Agregar al Carrito</button>
+                </div>
+            `).join('');
+        }
+
+        // Agregar producto al carrito
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const cartItem = cart.find(item => item.id === productId);
+
+            if (cartItem) {
+                cartItem.quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            renderCart();
+        }
+
+        // Eliminar producto del carrito
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            renderCart();
+        }
+
+        // Renderizar el contenido y totales del carrito
+        function renderCart() {
+            const cartItemsList = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotalPrice = document.getElementById('cart-total-price');
+
+            // Actualizar contador superior
+            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalCount;
+
+            // Validar si está vacío
+            if (cart.length === 0) {
+                cartItemsList.innerHTML = '<p class="empty-cart">El carrito está vacío</p>';
+                cartTotalPrice.textContent = '$0.00';
+                return;
+            }
+
+            // Generar lista de elementos en el carrito y calcular total
+            let total = 0;
+            cartItemsList.innerHTML = cart.map(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                return `
+                    <li class="cart-item">
+                        <div class="cart-item-details">
+                            <span>${item.name} (x${item.quantity})</span>
+                            <span class="cart-item-price">$${itemTotal.toFixed(2)}</span>
+                        </div>
+                        <button class="btn-remove" onclick="removeFromCart(${item.id})">Eliminar</button>
+                    </li>
+                `;
+            }).join('');
+
+            cartTotalPrice.textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Simular proceso de pago
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Tu carrito está vacío.');
+                return;
+            }
+            alert('¡Compra realizada con éxito! Gracias por tu pedido.');
+            cart = [];
+            renderCart();
+        }
+
+        // Inicializar la aplicación al cargar la página
+        renderProducts();
+    </script>
+</body>
+</html>
